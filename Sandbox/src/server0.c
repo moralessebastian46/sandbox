@@ -3,15 +3,18 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+// Puerto sobre el cual va a estar escuchando
+const int PORT = 8080;
+
 int main(void) {
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port= htons(8080);
+	direccionServidor.sin_port= htons(PORT);
 	
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 	
-	// Las siguientes dos lineas sirven para no lockear el addres
+	// Las siguientes dos lineas sirven para no lockear el address
 	int activado = 1;
 	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
 
@@ -30,25 +33,34 @@ int main(void) {
 	int cliente = accept(servidor, (void*) &direccionCliente, &tamanioDireccion);
 
 	printf("Recibí una conexion en %d!! \n", cliente);
-	send(cliente, "Hola cliente!\n", 14, 0);
-	send(cliente, "I see you! :D", 3, 0);
+ 	send(cliente, "Hola Instancia!\n", 16, 0);
+	send(cliente, "I see you! :D\n", 15, 0);
 
 	//------------
 
-	char* buffer = malloc(1000);
+	char* buffer = malloc(5);
 
-	while(1) {
-		int bytesRecibidos = recv(cliente, buffer, 1000, 0);
-		if (bytesRecibidos <= 0) {
-			perror("El cliente se desconectó o algo sucedio..");
+	// while(1) {
+		int bytesRecibidos = recv(cliente, buffer, 4, 0);
+		printf("%d", bytesRecibidos);
+
+		if (bytesRecibidos < 0) {
+			perror("La Instancia se desconectó o algo sucedio..");
 			return 1;
 		}
 
 		buffer[bytesRecibidos] = '\0';
 		printf("Me llegaron %d bytes con %s\n", bytesRecibidos, buffer);
-	}
-
+// }
 	free(buffer);
+
+	/* uint32_t tamanioPaquete;
+	recv(cliente, &tamanioPaquete, 4, 0);
+
+	char* buffer = malloc(tamanioPaquete);
+	recv(cliente, buffer, tamanioPaquete, MSG_WAITALL);
+*/
+//	for(;;);
 
 	return 0;
 }
