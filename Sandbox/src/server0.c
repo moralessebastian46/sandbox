@@ -22,15 +22,24 @@ int main(void) {
 		perror("Falló el bind");
 		return 1;
 	}
+
+	if (listen(servidor,100) == -1) {
+		perror("Falló el listen");
+		return 1;
+	}
 	
 	printf("Estoy escuchando\n");
-	listen(servidor,100);
-	
+
+
 	//-------------------
 
 	struct sockaddr_in direccionCliente;
 	unsigned int tamanioDireccion;
 	int cliente = accept(servidor, (void*) &direccionCliente, &tamanioDireccion);
+	if (cliente == -1) {
+		perror("Falló el accept");
+		return 1;
+	}
 
 	printf("Recibí una conexion en %d!! \n", cliente);
  	send(cliente, "Hola Instancia!\n", 16, 0);
@@ -38,9 +47,9 @@ int main(void) {
 
 	//------------
 
-	char* buffer = malloc(5);
+	/*char* buffer = malloc(5);
 
-	// while(1) {
+	//	while(1) {
 		int bytesRecibidos = recv(cliente, buffer, 4, 0);
 		printf("%d", bytesRecibidos);
 
@@ -51,16 +60,19 @@ int main(void) {
 
 		buffer[bytesRecibidos] = '\0';
 		printf("Me llegaron %d bytes con %s\n", bytesRecibidos, buffer);
-// }
+//}
 	free(buffer);
 
-	/* uint32_t tamanioPaquete;
+/*
+	uint32_t tamanioPaquete;
+
 	recv(cliente, &tamanioPaquete, 4, 0);
 
 	char* buffer = malloc(tamanioPaquete);
-	recv(cliente, buffer, tamanioPaquete, MSG_WAITALL);
+	recv(cliente, buffer, tamanioPaquete, 0); //MSG_WAITALL
 */
-//	for(;;);
+
+	for(;;);
 
 	return 0;
 }
